@@ -9,6 +9,7 @@ from controller_server_path import PathManager
 from dateutil.relativedelta import relativedelta
 import calendar
 from copernicusmarine import subset
+import numpy as np
 
 class Utility:
     @staticmethod
@@ -158,7 +159,8 @@ class Utility:
                 "last_run_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 "next_download_file":new_file_name,
                 "last_download_file":task.next_download_file,
-                "success_count":task.success_count + 1
+                "success_count":task.success_count + 1,
+                "health":"Excellent"
             }
             Utility.update_api(PathManager.get_url('ocean-api','task',str(task.id)), data)
             print('File download successful!')
@@ -168,7 +170,8 @@ class Utility:
             data = {
                 "next_run_time":update_time,
                 "last_run_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                "attempt_count":task.attempt_count + 1
+                "attempt_count":task.attempt_count + 1,
+                "health":"Poor"
             }
             Utility.update_api(PathManager.get_url('ocean-api','task',str(task.id)), data)
 
@@ -177,7 +180,8 @@ class Utility:
             data = {
                     "next_run_time":update_time,
                     "last_run_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                    "fail_count":task.fail_count + 1
+                    "fail_count":task.fail_count + 1,
+                    "health":"Failed"
             }
             Utility.update_api(PathManager.get_url('ocean-api','task',str(task.id)), data)
             print('Download Failed')
@@ -260,3 +264,53 @@ class Utility:
         lastSunday = Utility.get_last_sunday(new_date_time_months.year, new_date_time_months.month)
 
         return "%s.%s" % (lastSunday.strftime("%Y%m%d"), "nc")
+    
+    @staticmethod
+    def reproject_netcdf(ds, old_path, new_path):
+        try:
+            subset = xr.open_dataset(old_path)
+            lon, lat = "", ""
+            #CHECK IF DIMENSIONS ARE CORRECT
+            for dim_name, dim in subset.dims.items():
+                origname = dim_name.strip()
+                tolower = origname.lower()
+                if 'lon' in tolower:
+                    lon = tolower
+                if 'lat' in tolower:
+                    lat = tolower
+            
+            
+            #CHECK IF LON BETWEEN 0 TO 360
+            below_zero = (subset[lon] > 180).any().values
+
+            if below_zero:
+                print('converting from 0-360 to -180-180')
+                lons = np.asarray(subset[lon].values)
+                lons = (lons + 180) % 360 - 180
+                subset[lon] = lons
+                subset  = xr.decode_cf(ds )
+                subset.to_netcdf(path=new_path ,mode='w',format='NETCDF4',  engine='netcdf4')
+            
+            return True
+        except Exception as e:
+            return False
+    @staticmethod
+    def download_obdaac(url, local_filename):
+        try:
+        # Send a GET request to the URL
+            with requests.get(url, stream=True, timeout=120) as response:
+                # Check if the request was successful
+                response.raise_for_status()
+                # Open a local file with the desired name
+                with open(local_filename, 'wb') as file:
+                    # Write the content to the file in chunks
+                    #file.write(response.content)
+                    for chunk in response.iter_content(chunk_size=8192):
+                        if chunk:
+                            file.write(chunk)
+            print(f"File downloaded as {local_filename}")
+            return True
+        except Exception as e:
+            print(e)
+            return False
+            print('File not found.')

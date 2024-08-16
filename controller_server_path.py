@@ -1,12 +1,15 @@
 
 class PathManager:
     # Hardcoded URL paths
+    base_dir = "/home/pop/Desktop/ocean-portal2.0/backend_design"
+    #base_dir = "/scripts"
+    datasets = "/home/pop/ocean_portal/datasets"
     URLS = {
         'ocean-api': 'https://dev-oceanportal.spc.int/v1/api',
-        'tmp': '/home/pop/Desktop/ocean-portal2.0/backend_design/tmp',
-        'odbaac': '/home/pop/Desktop/ocean-portal2.0/backend_design',
-        'copernicus-credentials': '/home/pop/Desktop/ocean-portal2.0/backend_design/.copernicusmarine/.copernicusmarine-credentials',
-        'root-dir': '/home/pop/ocean_portal/datasets'
+        'tmp': base_dir+'/tmp',
+        'odbaac': base_dir,
+        'copernicus-credentials': base_dir+'/.copernicusmarine/.copernicusmarine-credentials',
+        'root-dir': datasets
     }
 
     @classmethod

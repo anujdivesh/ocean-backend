@@ -10,7 +10,7 @@ rootPath="${baseURL}/ocean_portal"
 #SUB DIRECTORIES
 sub_dir1=(bom nasa noaa csiro copernicus spc)
 sub_dir2=(historical hindcast forecast nrt outlook)
-sub_dir3=(hourly daily monthly yearly)
+sub_dir3=(hourly daily weekly monthly yearly)
 
 #DATASETS - DO NOT CHANGE
 echo "Creating dataset directories."

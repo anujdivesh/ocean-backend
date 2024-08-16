@@ -1,11 +1,29 @@
 import xarray as xr
-import matplotlib.pyplot as plt 
 import numpy as np
 
 #CHECK  IF WE HAVE TO CONVERT TO 0 TO 360
-ds = xr.open_dataset('noaa-crw_mhw_v1.0.1_category_20240719.nc')
+ds = xr.open_dataset('/home/pop/ocean_portal/datasets/model/regional/copernicus/forecast/daily/phytoplankton/latest.nc')
 #ds = xr.open_dataset('combined.nc')
 
+
+lon = 'longitude' 
+below_zero = (ds[lon] > 180).any().values
+
+if below_zero:
+    print('converting from 0-360 to -180-180')
+    lons = np.asarray(ds[lon].values)
+    lons = (lons + 180) % 360 - 180
+    ds[lon] = lons
+    subset  = xr.decode_cf(ds )
+    subset.to_netcdf(path='/home/pop/ocean_portal/datasets/model/regional/copernicus/forecast/daily/phytoplankton/subset.nc' ,mode='w',format='NETCDF4',  engine='netcdf4')
+
+#    first_part = ds.where(ds['longitude'] < 180, drop=True)
+#    part_to_remove = ds.where(ds['longitude'] > 180, drop=True)
+#    part_to_remove['longitude'] = (part_to_remove['longitude'] + 360) % 360
+#    ds = xr.concat([first_part, part_to_remove], dim='longitude')
+
+
+"""
 below_zero = (ds['lon'] < 0).any().values
 if below_zero:
     first_part = ds.where(ds['lon'] > 0, drop=True)
@@ -18,7 +36,7 @@ subset = ds.sel(lat=slice(-45, 45),\
 
 subset  = xr.decode_cf(ds )
 subset.to_netcdf(path='subset.nc' ,mode='w',format='NETCDF4',  engine='netcdf4')
-
+"""
 """
 ds = xr.open_dataset('noaa-crw_mhw_v1.0.1_category_20240719.nc')
 
