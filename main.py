@@ -4,16 +4,16 @@ from utility_functions import Utility
 from controller_server_path import PathManager
 
 if __name__ == "__main__":
-    url= PathManager.get_url('ocean-api','tasks')
+    url= PathManager.get_url('ocean-api','task_download')
     tasks = initialize_taskController(url)
     
     for task in tasks:
         if task.class_id == "download":
-            execute = Utility.time_diff(datetime.now(),datetime.strptime(task.next_run_time,"%Y-%m-%dT%H:%M:%S.000Z"))
+            execute = Utility.time_diff(datetime.now(),datetime.strptime(task.next_run_time,"%Y-%m-%dT%H:%M:%SZ"))
             #REMOVE THIS IN PROD
             #execute = True
             if execute and task.enabled:
                 #print(task.id)
-                if task.id == 3 or task.id == 4:
+                if task.id == 1:
                     print('Executing Task No.%s - %s' % (task.id, task.task_name))
-                    task.dataDownload()
+                task.dataDownload()
