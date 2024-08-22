@@ -16,4 +16,4 @@ if __name__ == "__main__":
                 #print(task.id)
                 if task.id == 1:
                     print('Executing Task No.%s - %s' % (task.id, task.task_name))
-                task.dataDownload()
+                    task.dataDownload()
